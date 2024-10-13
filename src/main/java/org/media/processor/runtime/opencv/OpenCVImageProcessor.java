@@ -9,7 +9,7 @@ import org.media.processor.Image;
 import org.media.processor.ImageProcessor;
 import org.media.processor.StepException;
 
-import java.io.IOException;
+import static org.bytedeco.opencv.global.opencv_core.addWeighted;
 
 @SuppressWarnings("java:S1659")
 public class OpenCVImageProcessor implements ImageProcessor<Mat> {
@@ -22,8 +22,18 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
         }
     }
 
+    private final double gamma;
+
     private int x, y;
     private Image<Mat> source, source2;
+
+    public OpenCVImageProcessor() {
+        this(0.0);
+    }
+
+    public OpenCVImageProcessor(double gamma) {
+        this.gamma = gamma;
+    }
 
     @Override
     public void blending(Image<Mat> src, Image<Mat> srcOp) {
@@ -40,30 +50,24 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
 
     @Override
     public Image<Mat> process() throws StepException {
-        if (source2.getHeight() > source.getHeight()) {
-            int newHeight = source.getHeight();
-            this.source2 = new OpenCVImage(resize(newHeight, this.source2.getWidth(), this.source2.image()), this.source2.opacity());
+        double alpha, beta;
+
+        alpha = getAlpha();
+
+        beta = 1.0 - alpha;
+
+        if (source.getWidth() != source2.getWidth() || source.getHeight() != source2.getHeight()) {
+            this.source2 = new OpenCVImage(resize(source.getWidth(), source.getHeight(), this.source2.image()), this.source2.opacity());
         }
 
-        if (source2.getWidth() > source.getWidth()) {
-            int newWidth = source.getWidth();
-            this.source2 = new OpenCVImage(resize(this.source2.getHeight(), newWidth, this.source2.image()), this.source2.opacity());
-        }
-
-        if (x + source2.getWidth() <= source.getWidth() && y + source2.getHeight() <= source.getHeight()) {
-            int newWidth = source.getHeight() - x;
-            int newHeight = source.getWidth() - y;
-            this.source2 = new OpenCVImage(resize(newHeight, newWidth, this.source2.image()), this.source2.opacity());
-        }
-
-        try (Rect roi = new Rect(this.x, this.y, this.source2.getWidth(), this.source2.getHeight())) {
+        try (Rect roi = new Rect(this.x, this.y, this.source2.getHeight(), this.source2.getWidth())) {
 
             Mat src = this.source.image();
             Mat srcOp = this.source2.image();
 
             Mat output = new Mat(src, roi);
 
-            srcOp.copyTo(output);
+            addWeighted(output, alpha, srcOp, beta, gamma, output);
 
             return new OpenCVImage(output, 1.0);
         } catch (RuntimeException e) {
@@ -77,8 +81,26 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
         return resized;
     }
 
+    private double getAlpha() {
+        double alpha = 0.7;
+
+        if (this.source.opacity() < this.source2.opacity()) {
+            alpha = this.source2.opacity();
+        }
+
+        if (this.source.opacity() > this.source2.opacity()) {
+            alpha = this.source.opacity();
+        }
+
+        if (this.source.opacity() == this.source2.opacity()) {
+            alpha = 0.5;
+        }
+
+        return alpha;
+    }
+
     @Override
-    public void close() throws IOException {
+    public void close() {
         // Do nothing
     }
 }

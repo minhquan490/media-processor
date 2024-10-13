@@ -22,17 +22,17 @@ import java.util.Map;
 public class WatermarkedVideoProcessor extends OpenCVVideoProcessor {
     private final WatermarkPosition position;
 
-    protected WatermarkedVideoProcessor(String path, String destination, WatermarkPosition position) throws IOException {
+    public WatermarkedVideoProcessor(String path, String destination, WatermarkPosition position) throws IOException {
         super(path, destination);
         this.position = position;
     }
 
-    protected WatermarkedVideoProcessor(File videoFile, File destination, WatermarkPosition position) throws IOException {
+    public WatermarkedVideoProcessor(File videoFile, File destination, WatermarkPosition position) throws IOException {
         super(videoFile, destination);
         this.position = position;
     }
 
-    protected WatermarkedVideoProcessor(InputStream videoStream, File destination, WatermarkPosition position) throws IOException {
+    public WatermarkedVideoProcessor(InputStream videoStream, File destination, WatermarkPosition position) throws IOException {
         super(videoStream, destination);
         this.position = position;
     }

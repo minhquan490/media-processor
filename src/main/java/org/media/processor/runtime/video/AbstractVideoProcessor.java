@@ -58,7 +58,7 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
             } else {
                 frameGrabber = new FFmpegFrameGrabber(source);
             }
-            frameGrabber.start(); // grabber call source.toString to find file name ?
+            frameGrabber.start(); // grabber call source.toString to find file name?
         }
         return frameGrabber;
     }
@@ -141,12 +141,8 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
 
     @Override
     public void watermarked(File watermark, int width, int height) {
-        try {
-            Image<InputStream> image = new WatermarkImage(watermark, height, width);
-            watermarked(image);
-        } catch (IOException e) {
-            throw new StepException("Can not process watermarked video", e);
-        }
+        Image<InputStream> image = new WatermarkImage(watermark, height, width);
+        watermarked(image);
     }
 
     protected void releaseGrabber(FrameGrabber grabber) throws FrameGrabber.Exception {
@@ -206,7 +202,7 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
         private final int height;
         private final int width;
 
-        private WatermarkImage(File file, int height, int width) throws IOException {
+        private WatermarkImage(File file, int height, int width) {
             this.inputStream = ResourceUtils.wrap(file);
             this.height = height;
             this.width = width;

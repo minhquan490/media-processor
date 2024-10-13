@@ -2,11 +2,10 @@ package org.media.processor.runtime.opencv.mat;
 
 import org.media.processor.Image;
 
-import java.io.IOException;
 import java.io.InputStream;
 
 public abstract class WatermarkedPositionMatProcessor extends WatermarkedMatProcessor {
-    protected WatermarkedPositionMatProcessor(Image<InputStream> watermarked) throws IOException {
+    protected WatermarkedPositionMatProcessor(Image<InputStream> watermarked) {
         super(watermarked);
     }
 

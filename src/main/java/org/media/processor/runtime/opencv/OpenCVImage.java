@@ -4,8 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.media.processor.Image;
 
-import java.io.IOException;
-
 public record OpenCVImage(Mat image, double opacity) implements Image<Mat> {
 
     @Override
@@ -24,7 +22,7 @@ public record OpenCVImage(Mat image, double opacity) implements Image<Mat> {
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
         if (image != null) {
             image.close();
         }

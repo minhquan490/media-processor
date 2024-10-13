@@ -30,7 +30,7 @@ class WatermarkedVideoProcessorTest {
         // Original - width: 1080, height: 1920
         WatermarkedVideoProcessor videoProcessor = new WatermarkedVideoProcessor("classpath:files/Original.mp4", path.toString(), WatermarkPosition.TOP_LEFT);
 
-        videoProcessor.watermarked("classpath:files/fog-4436636_1920.jpg", 1279, 1920);
+        videoProcessor.watermarked("classpath:files/facebook-logo.png", 512, 512);
 
         var result = videoProcessor.process();
 

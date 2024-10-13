@@ -1,6 +1,5 @@
 package org.media.processor.runtime.opencv.mat;
 
-import org.bytedeco.javacpp.BytePointer;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.media.processor.Image;
 import org.media.processor.ImageProcessor;
@@ -17,16 +16,19 @@ import static org.bytedeco.opencv.global.opencv_imgcodecs.imread;
 public abstract class WatermarkedMatProcessor implements OpenCVVideoProcessor.MatProcessor {
     private final ImageProcessor<Mat> imageProcessor;
     private final Mat watermark;
+    private final Image<InputStream> watermarkImage;
 
     protected WatermarkedMatProcessor(Image<InputStream> watermarked) {
         this.imageProcessor = new OpenCVImageProcessor();
         this.watermark = imread(watermarked.getLocation(), IMREAD_COLOR);
+        this.watermarkImage = watermarked;
     }
 
     @Override
     public void close() throws IOException {
         imageProcessor.close();
         watermark.close();
+        watermarkImage.close();
     }
 
     @Override
