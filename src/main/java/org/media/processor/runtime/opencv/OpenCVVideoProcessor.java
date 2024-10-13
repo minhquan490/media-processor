@@ -47,7 +47,7 @@ public abstract class OpenCVVideoProcessor extends AbstractVideoProcessor<Mat> {
 
     @Override
     protected Frame processFrame(Frame frame, FrameConverter<Mat> converter) {
-        if (processor == null || frame == null ) {
+        if (processor == null || frame == null || frame.image == null) {
             return frame;
         }
 
