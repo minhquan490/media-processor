@@ -1,10 +1,9 @@
-package org.media.processor.runtime.video;
+package org.media.processor.runtime.opencv.video;
 
 import org.bytedeco.javacv.FrameRecorder;
 import org.media.processor.Image;
 import org.media.processor.VideoRecorderCustomizer;
 import org.media.processor.WatermarkPosition;
-import org.media.processor.runtime.opencv.OpenCVVideoProcessor;
 import org.media.processor.runtime.opencv.mat.BottomCenterWatermarkedMatProcessor;
 import org.media.processor.runtime.opencv.mat.BottomLeftWatermarkedMatProcessor;
 import org.media.processor.runtime.opencv.mat.BottomRightWatermarkedMatProcessor;
@@ -21,20 +20,28 @@ import java.util.Map;
 
 public class WatermarkedVideoProcessor extends OpenCVVideoProcessor {
     private final WatermarkPosition position;
+    private final List<VideoRecorderCustomizer<FrameRecorder>> customizers;
 
     public WatermarkedVideoProcessor(String path, String destination, WatermarkPosition position) throws IOException {
+        this(path, destination, position, List.of());
+    }
+
+    public WatermarkedVideoProcessor(String path, String destination, WatermarkPosition position, List<VideoRecorderCustomizer<FrameRecorder>> customizers) throws IOException {
         super(path, destination);
         this.position = position;
+        this.customizers = customizers;
     }
 
-    public WatermarkedVideoProcessor(File videoFile, File destination, WatermarkPosition position) throws IOException {
+    public WatermarkedVideoProcessor(File videoFile, File destination, WatermarkPosition position, List<VideoRecorderCustomizer<FrameRecorder>> customizers) throws IOException {
         super(videoFile, destination);
         this.position = position;
+        this.customizers = customizers;
     }
 
-    public WatermarkedVideoProcessor(InputStream videoStream, File destination, WatermarkPosition position) throws IOException {
+    public WatermarkedVideoProcessor(InputStream videoStream, File destination, WatermarkPosition position, List<VideoRecorderCustomizer<FrameRecorder>> customizers) throws IOException {
         super(videoStream, destination);
         this.position = position;
+        this.customizers = customizers;
     }
 
     @Override
@@ -44,7 +51,7 @@ public class WatermarkedVideoProcessor extends OpenCVVideoProcessor {
 
     @Override
     protected List<VideoRecorderCustomizer<FrameRecorder>> getVideoRecorderCustomizers() {
-        return List.of();
+        return customizers;
     }
 
     @Override

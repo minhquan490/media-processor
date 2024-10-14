@@ -1,11 +1,10 @@
-package org.media.processor.runtime.opencv;
+package org.media.processor.runtime.opencv.video;
 
 import org.bytedeco.javacv.Frame;
 import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.OpenCVFrameConverter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.media.processor.Image;
-import org.media.processor.runtime.video.AbstractVideoProcessor;
 
 import java.io.Closeable;
 import java.io.File;

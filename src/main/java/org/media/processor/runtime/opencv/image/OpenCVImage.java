@@ -1,4 +1,4 @@
-package org.media.processor.runtime.opencv;
+package org.media.processor.runtime.opencv.image;
 
 import org.apache.commons.lang3.StringUtils;
 import org.bytedeco.opencv.opencv_core.Mat;

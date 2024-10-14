@@ -1,4 +1,4 @@
-package org.media.processor.runtime.video;
+package org.media.processor.runtime.opencv.video;
 
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.ffmpeg.global.avutil;
@@ -135,7 +135,7 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
                 }
             });
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new StepException("Fail to prepare data for watermarked", e);
         }
     }
 
@@ -168,7 +168,7 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
 
         recorder.setOptions(getAdditionRecorderOptions());
 
-        getVideoRecorderCustomizers().forEach(customizer -> customizer.customize(recorder));
+        getVideoRecorderCustomizers().forEach(customizer -> customizer.customize(recorder, frameGrabber));
 
         return recorder;
     }

@@ -1,9 +1,8 @@
-package org.media.processor.runtime.opencv;
+package org.media.processor.runtime.opencv.image;
 
 import org.bytedeco.opencv.global.opencv_core;
 import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Rect;
 import org.bytedeco.opencv.opencv_core.Size;
 import org.media.processor.Image;
 import org.media.processor.ImageProcessor;
@@ -18,13 +17,12 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
         try {
             ClassLoader.getSystemClassLoader().loadClass(opencv_core.class.getName());
         } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+            throw new StepException("Fail to init class OpenCVImageProcessor", e);
         }
     }
 
     private final double gamma;
 
-    private int x, y;
     private Image<Mat> source, source2;
 
     public OpenCVImageProcessor() {
@@ -37,13 +35,6 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
 
     @Override
     public void blending(Image<Mat> src, Image<Mat> srcOp) {
-        blending(0, 0, src, srcOp);
-    }
-
-    @Override
-    public void blending(int x, int y, Image<Mat> src, Image<Mat> srcOp) {
-        this.x = Math.max(x, 0);
-        this.y = Math.max(y, 0);
         this.source = src;
         this.source2 = srcOp;
     }
@@ -60,19 +51,14 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
             this.source2 = new OpenCVImage(resize(source.getWidth(), source.getHeight(), this.source2.image()), this.source2.opacity());
         }
 
-        try (Rect roi = new Rect(this.x, this.y, this.source2.getHeight(), this.source2.getWidth())) {
+        Mat src = this.source.image();
+        Mat srcOp = this.source2.image();
 
-            Mat src = this.source.image();
-            Mat srcOp = this.source2.image();
+        Mat output = new Mat();
 
-            Mat output = new Mat(src, roi);
+        addWeighted(src, alpha, srcOp, beta, gamma, output);
 
-            addWeighted(output, alpha, srcOp, beta, gamma, output);
-
-            return new OpenCVImage(output, 1.0);
-        } catch (RuntimeException e) {
-            throw new StepException("Fail to process image", e);
-        }
+        return new OpenCVImage(output, 1.0);
     }
 
     private Mat resize(int newHeight, int newWidth, Mat original) {
