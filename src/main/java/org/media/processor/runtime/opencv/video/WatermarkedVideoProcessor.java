@@ -2,6 +2,7 @@ package org.media.processor.runtime.opencv.video;
 
 import org.bytedeco.javacv.FrameRecorder;
 import org.media.processor.Image;
+import org.media.processor.StepException;
 import org.media.processor.VideoRecorderCustomizer;
 import org.media.processor.WatermarkPosition;
 import org.media.processor.runtime.opencv.mat.BottomCenterWatermarkedMatProcessor;
@@ -68,7 +69,7 @@ public class WatermarkedVideoProcessor extends OpenCVVideoProcessor {
                 case CENTER -> new CenterWatermarkedMatProcessor(watermarked);
             };
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new StepException("Fail to create type processor", e);
         }
     }
 
