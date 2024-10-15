@@ -42,7 +42,7 @@ class WatermarkedVideoProcessorTest {
         WatermarkedVideoProcessor videoProcessor = new WatermarkedVideoProcessor(
                 "classpath:files/Original.mp4",
                 path.toString(),
-                WatermarkPosition.TOP_RIGHT,
+                WatermarkPosition.BOTTOM_CENTER,
                 List.of(customizer)
         );
 

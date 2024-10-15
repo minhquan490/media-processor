@@ -13,11 +13,12 @@ public class BottomCenterWatermarkedMatProcessor extends WatermarkedPositionMatP
 
     @Override
     protected int calculateMinX(Mat src, float scale) {
-        return 0;
+        return (src.rows() / 2) + 500;
     }
 
     @Override
     protected int calculateMinY(Mat src, float scale) {
-        return 0;
+        float halfHeight = src.cols() / 2f;
+        return (int) (halfHeight - (100f * scale));
     }
 }
