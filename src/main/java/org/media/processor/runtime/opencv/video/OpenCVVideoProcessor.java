@@ -56,9 +56,9 @@ public abstract class OpenCVVideoProcessor extends AbstractVideoProcessor<Mat> {
             return frame;
         }
 
-        Mat result = processor.process(original);
-
-        return converter.convert(result);
+        try (Mat result = processor.process(original)) {
+            return converter.convert(result);
+        }
     }
 
     @Override

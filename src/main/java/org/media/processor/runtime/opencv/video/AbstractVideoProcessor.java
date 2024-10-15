@@ -79,6 +79,7 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
                 while ((frame = grabber.grab()) != null) {
                     try (Frame result = processFrame(frame, converter)) {
                         recorder.record(result);
+                        frame.close();
                     }
                 }
             }
