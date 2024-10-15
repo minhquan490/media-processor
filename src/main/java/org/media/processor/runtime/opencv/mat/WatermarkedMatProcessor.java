@@ -35,13 +35,13 @@ public abstract class WatermarkedMatProcessor implements OpenCVVideoProcessor.Ma
 
     @Override
     public Mat process(Mat original) {
+        Image<Mat> src = new OpenCVImage(original, getSrcOpacity());
+        float scale = calculateScale(src, watermarkImage);
+
         if (!watermarkImage.isPrepared()) {
-            watermarkImage = new PreparedImage(prepareWatermark(watermarkImage, original.rows(), original.cols()));
-            watermarkImage.setPrepared(true);
-            cachedWatermark = imread(watermarkImage.getLocation(), IMREAD_COLOR);
+            prepareWatermark(src, scale);
         }
 
-        Image<Mat> src = new OpenCVImage(original, getSrcOpacity());
         Image<Mat> srcOp = new OpenCVImage(cachedWatermark, getSrcOpOpacity());
 
         imageProcessor.blending(src, srcOp);
@@ -51,19 +51,35 @@ public abstract class WatermarkedMatProcessor implements OpenCVVideoProcessor.Ma
         return result.image();
     }
 
-    @Deprecated(since = "1.0")
-    protected abstract int calculateX(Mat src, Mat srcOp);
-    @Deprecated(since = "1.0")
-    protected abstract int calculateY(Mat src, Mat srcOp);
+    protected abstract int calculateMinX(Mat src, float scale);
+    protected abstract int calculateMinY(Mat src, float scale);
     protected abstract double getSrcOpacity();
     protected abstract double getSrcOpOpacity();
 
-    private Image<InputStream> prepareWatermark(Image<InputStream> watermarked, int width, int height) {
+    private void prepareWatermark(Image<Mat> src, float scale) {
+        Mat original = src.image();
+        int minX = calculateMinX(original, scale);
+        int minY = calculateMinY(original, scale);
+        watermarkImage = new PreparedImage(prepareWatermark(watermarkImage, original.rows(), original.cols(), minX, minY, scale));
+        watermarkImage.setPrepared(true);
+        cachedWatermark = imread(watermarkImage.getLocation(), IMREAD_COLOR);
+    }
+
+    private float calculateScale(Image<Mat> src , Image<?> srcOp) {
+        int originalWidth = srcOp.getWidth();
+        int originalHeight = srcOp.getHeight();
+        int outputWidth = src.getWidth();
+        int outputHeight = src.getHeight();
+
+        return (float) (1.0 + (((float) originalWidth / (float) outputWidth) + ((float) originalHeight / (float) outputHeight)) / 2f);
+    }
+
+    private Image<InputStream> prepareWatermark(Image<InputStream> watermarked, int width, int height, int minX, int minY, float scale) {
         try {
             String location = watermarked.getLocation();
             if (location.endsWith("svg")) {
                 try (watermarked) {
-                    Svg2ImageConverter converter = new Svg2ImageConverter(location, "png");
+                    Svg2ImageConverter converter = new Svg2ImageConverter(location, "png", minX, minY, scale);
                     return converter.convertImage(width, height, watermarked.getWidth(), watermarked.getHeight());
                 }
             }

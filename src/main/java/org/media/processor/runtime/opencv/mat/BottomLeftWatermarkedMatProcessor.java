@@ -12,12 +12,12 @@ public class BottomLeftWatermarkedMatProcessor extends WatermarkedPositionMatPro
     }
 
     @Override
-    protected int calculateX(Mat src, Mat srcOp) {
+    protected int calculateMinX(Mat src, float scale) {
         return 0;
     }
 
     @Override
-    protected int calculateY(Mat src, Mat srcOp) {
-        return src.cols() - srcOp.cols();
+    protected int calculateMinY(Mat src, float scale) {
+        return src.cols();
     }
 }

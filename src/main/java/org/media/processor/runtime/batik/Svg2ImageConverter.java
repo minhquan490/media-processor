@@ -24,10 +24,16 @@ import java.io.InputStream;
 public class Svg2ImageConverter {
     private final ResourceIO resourceIO;
     private final String resultExt;
+    private final int minX;
+    private final int minY;
+    private final float scale;
 
-    public Svg2ImageConverter(String svgPath, String resultExt) throws IOException {
+    public Svg2ImageConverter(String svgPath, String resultExt, int minX, int minY, float scale) throws IOException {
         this.resourceIO = ResourceUtils.getResourceAsStream(ensureIsSvg(svgPath));
         this.resultExt = resultExt;
+        this.minX = minX;
+        this.minY = minY;
+        this.scale = scale;
     }
 
     public Image<InputStream> convertImage(int outputWidth, int outputHeight, int originalWidth, int originalHeight) throws IOException, TranscoderException {
@@ -57,23 +63,14 @@ public class Svg2ImageConverter {
         root.setAttribute("width", String.valueOf(originalWidth));
         root.setAttribute("height", String.valueOf(originalHeight));
 
-        float scaleVal = calculateScale(originalWidth, outputWidth, originalHeight, outputHeight);
-
-        float minX = ((float) outputWidth / 2) - (125f * scaleVal);
-        float minY = (float) ((double) outputHeight / 2) - (100f * scaleVal);
-
         root.setAttribute("viewBox", -minY + " " + -minX + " " + (float) outputHeight + " " + (float) outputWidth);
 
         NodeList gTagList = root.getElementsByTagName("g");
 
         for (int i = 0; i < gTagList.getLength(); i++) {
             Element gTag = (Element) gTagList.item(i);
-            gTag.setAttribute("transform", "scale(" + scaleVal + ")");
+            gTag.setAttribute("transform", "scale(" + scale + ")");
         }
-    }
-
-    private float calculateScale(int originalWidth, int outputWidth, int originalHeight, int outputHeight) {
-        return (float) (1.0 + (((float) originalWidth / (float) outputWidth) + ((float) originalHeight / (float) outputHeight)) / 2f);
     }
 
     private ImageTranscoder createTranscoder() {
