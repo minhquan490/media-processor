@@ -6,11 +6,11 @@ import java.io.InputStream;
 public interface Video<T> {
     T getData() throws IOException;
 
-    InputStream getStream() throws IOException;
+    InputStream stream() throws IOException;
 
     long duration();
 
-    long getSize();
+    long size();
 
     double frameRate();
 

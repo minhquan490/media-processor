@@ -9,6 +9,7 @@ import org.bytedeco.javacv.FrameConverter;
 import org.bytedeco.javacv.FrameGrabber;
 import org.bytedeco.javacv.FrameRecorder;
 import org.media.processor.Image;
+import org.media.processor.IncorrectTypeException;
 import org.media.processor.StepException;
 import org.media.processor.Video;
 import org.media.processor.VideoProcessor;
@@ -21,11 +22,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
-    private final ResourceIO videoStream;
-    private final File destination;
+    protected final ResourceIO videoStream;
+    protected final File destination;
 
     private FrameGrabber frameGrabber;
 
@@ -41,14 +41,17 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
         if (videoStream instanceof ResourceIO resourceIO) {
             this.videoStream = resourceIO;
         } else {
-            this.videoStream = ResourceUtils.wrap(videoStream);
+            this.videoStream = ResourceUtils.wrap(videoStream, getExtension(destination));
         }
         this.destination = destination;
     }
 
-    @Override
-    public void close() throws IOException {
-        videoStream.close();
+    private String getExtension(File file) {
+        String fileName = file.getName();
+        if (!fileName.contains(".")) {
+            throw new IncorrectTypeException("Not a file");
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
     protected FrameGrabber startFrameGrabber(InputStream source) throws FrameGrabber.Exception {
@@ -63,7 +66,6 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
         return frameGrabber;
     }
 
-    protected abstract Map<String, String> getAdditionRecorderOptions();
     protected abstract List<VideoRecorderCustomizer<FrameRecorder>> getVideoRecorderCustomizers();
     protected abstract Frame processFrame(Frame frame, FrameConverter<T> converter) throws FrameGrabber.Exception;
     protected abstract FrameConverter<T> createFrameConverter();
@@ -98,6 +100,11 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
         } catch (Exception e) {
             throw new StepException("Can not process input video", e);
         }
+    }
+
+    @Override
+    public void close() throws IOException {
+        videoStream.close();
     }
 
     @Override
@@ -167,8 +174,6 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
         recorder.setAudioCodec(avcodec.AV_CODEC_ID_AAC);
         recorder.setPixelFormat(avutil.AV_PIX_FMT_YUV420P);
 
-        recorder.setOptions(getAdditionRecorderOptions());
-
         getVideoRecorderCustomizers().forEach(customizer -> customizer.customize(recorder, frameGrabber));
 
         return recorder;
@@ -186,14 +191,14 @@ public abstract class AbstractVideoProcessor<T> implements VideoProcessor {
         }
 
         @Override
-        public InputStream getStream() throws IOException {
+        public InputStream stream() throws IOException {
             InputStream stream = getData();
             stream.reset();
             return stream;
         }
 
         @Override
-        public long getSize() {
+        public long size() {
             return resourceIO.available();
         }
     }

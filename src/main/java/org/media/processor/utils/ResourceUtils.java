@@ -1,7 +1,6 @@
 package org.media.processor.utils;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.media.processor.utils.io.ResourceIO;
 
 import java.io.File;
@@ -40,12 +39,18 @@ public final class ResourceUtils {
         return wrap(inputStream, DEFAULT_EXTENSION);
     }
 
-    public static ResourceIO wrap(@NotNull InputStream other, @Nullable String ext) throws IOException {
+    public static ResourceIO wrap(@NotNull InputStream other, @NotNull String ext) throws IOException {
         if (other instanceof ResourceIO resourceIO) {
-            return wrap(resourceIO.getResource());
+            return resourceIO;
+        }
+        StringBuilder extension = new StringBuilder();
+        if (ext.startsWith(".")) {
+            extension.append(ext.substring(1));
+        } else {
+            extension.append(ext);
         }
 
-        Path path = Path.of(UUID.randomUUID() + "." + ext);
+        Path path = Path.of(UUID.randomUUID() + "." + extension);
         Files.createFile(path);
 
         copy(other, path);

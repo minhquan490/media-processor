@@ -17,9 +17,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
-// TODO since watermark position Deprecated, modify this class to support it
 public class WatermarkedVideoProcessor extends OpenCVVideoProcessor {
     private final WatermarkPosition position;
     private final List<VideoRecorderCustomizer<FrameRecorder>> customizers;
@@ -44,11 +42,6 @@ public class WatermarkedVideoProcessor extends OpenCVVideoProcessor {
         super(videoStream, destination);
         this.position = position;
         this.customizers = customizers;
-    }
-
-    @Override
-    protected Map<String, String> getAdditionRecorderOptions() {
-        return Map.of();
     }
 
     @Override

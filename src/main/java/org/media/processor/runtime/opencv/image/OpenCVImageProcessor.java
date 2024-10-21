@@ -1,12 +1,11 @@
 package org.media.processor.runtime.opencv.image;
 
 import org.bytedeco.opencv.global.opencv_core;
-import org.bytedeco.opencv.global.opencv_imgproc;
 import org.bytedeco.opencv.opencv_core.Mat;
-import org.bytedeco.opencv.opencv_core.Size;
 import org.media.processor.Image;
 import org.media.processor.ImageProcessor;
 import org.media.processor.StepException;
+import org.media.processor.utils.ImageUtils;
 
 import static org.bytedeco.opencv.global.opencv_core.addWeighted;
 
@@ -62,9 +61,7 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
     }
 
     private Mat resize(int newHeight, int newWidth, Mat original) {
-        Mat resized = new Mat();
-        opencv_imgproc.resize(original, resized, new Size(newWidth, newHeight));
-        return resized;
+        return ImageUtils.resize(newHeight, newWidth, original);
     }
 
     private double getAlpha() {
