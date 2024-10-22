@@ -38,5 +38,7 @@ class ThumbnailVideoProcessorTest {
 
         Assertions.assertEquals(widthAndHeight, image.getWidth());
         Assertions.assertEquals(widthAndHeight, image.getHeight());
+
+        Files.deleteIfExists(path);
     }
 }
