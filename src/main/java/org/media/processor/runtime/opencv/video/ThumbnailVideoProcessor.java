@@ -7,10 +7,12 @@ import org.bytedeco.javacv.FrameRecorder;
 import org.bytedeco.javacv.Java2DFrameConverter;
 import org.bytedeco.opencv.opencv_core.Mat;
 import org.media.processor.Image;
+import org.media.processor.ImageProcessor;
 import org.media.processor.StepException;
 import org.media.processor.Video;
 import org.media.processor.VideoRecorderCustomizer;
-import org.media.processor.utils.ImageUtils;
+import org.media.processor.runtime.opencv.image.OpenCVImage;
+import org.media.processor.runtime.opencv.image.OpenCVImageProcessor;
 import org.media.processor.utils.ResourceUtils;
 
 import javax.imageio.ImageIO;
@@ -126,16 +128,29 @@ public class ThumbnailVideoProcessor extends OpenCVVideoProcessor {
         }
     }
 
-    private record ThumbnailMatProcessor(int width, int height) implements MatProcessor {
+    private static class ThumbnailMatProcessor implements MatProcessor {
+        private final ImageProcessor<Mat> resizeProcessor = new OpenCVImageProcessor();
+        private final int width;
+        private final int height;
 
-        @Override
-        public Mat process(Mat original) {
-            return ImageUtils.resize(height, width, original);
+        private ThumbnailMatProcessor(int width, int height) {
+            this.width = width;
+            this.height = height;
         }
 
         @Override
-        public void close() {
-            // Do nothing
+        public Mat process(Mat original) {
+            OpenCVImage openCVImage = new OpenCVImage(original, 1.0f);
+            resizeProcessor.resize(openCVImage, width, height);
+
+            Image<Mat> result = resizeProcessor.process();
+
+            return result.image();
+        }
+
+        @Override
+        public void close() throws IOException {
+            resizeProcessor.close();
         }
     }
 }

@@ -7,6 +7,8 @@ import org.media.processor.ImageProcessor;
 import org.media.processor.StepException;
 import org.media.processor.utils.ImageUtils;
 
+import java.io.IOException;
+
 import static org.bytedeco.opencv.global.opencv_core.addWeighted;
 
 @SuppressWarnings("java:S1659")
@@ -24,6 +26,8 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
 
     private Image<Mat> source, source2;
 
+    private ProcessType type;
+
     public OpenCVImageProcessor() {
         this(0.0);
     }
@@ -36,10 +40,40 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
     public void blending(Image<Mat> src, Image<Mat> srcOp) {
         this.source = src;
         this.source2 = srcOp;
+        this.type = ProcessType.BLENDING;
+    }
+
+    @Override
+    public void resize(Image<Mat> src, int width, int height) {
+        this.source = new Source(src, width, height);
+        this.source2 = null;
+        this.type = ProcessType.RESIZED;
     }
 
     @Override
     public Image<Mat> process() throws StepException {
+        return switch (type) {
+            case BLENDING -> processBlending();
+            case RESIZED -> processResize();
+            case null -> throw new StepException("Unknown type to process, supported is [blending, resized]");
+        };
+    }
+
+    @Override
+    public void close() {
+        // Do nothing
+    }
+
+    private Mat resize(int newHeight, int newWidth, Mat original) {
+        return ImageUtils.resize(newHeight, newWidth, original);
+    }
+
+    private Image<Mat> processResize() {
+        Mat output = resize(source.getHeight(), source.getWidth(), source.image());
+        return new OpenCVImage(output, 1.0);
+    }
+
+    private Image<Mat> processBlending() {
         double alpha, beta;
 
         alpha = getAlpha();
@@ -60,10 +94,6 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
         return new OpenCVImage(output, 1.0);
     }
 
-    private Mat resize(int newHeight, int newWidth, Mat original) {
-        return ImageUtils.resize(newHeight, newWidth, original);
-    }
-
     private double getAlpha() {
         double alpha = 0.7;
 
@@ -82,8 +112,41 @@ public class OpenCVImageProcessor implements ImageProcessor<Mat> {
         return alpha;
     }
 
-    @Override
-    public void close() {
-        // Do nothing
+    private record Source(Image<Mat> delegate, int newWidth, int newHeight) implements Image<Mat> {
+
+        @Override
+        public String getLocation() {
+            return delegate.getLocation();
+        }
+
+        @Override
+        public Mat image() {
+            return delegate.image();
+        }
+
+        @Override
+        public int getWidth() {
+            return newWidth;
+        }
+
+        @Override
+        public int getHeight() {
+            return newHeight;
+        }
+
+        @Override
+        public double opacity() {
+            return delegate.opacity();
+        }
+
+        @Override
+        public void close() throws IOException {
+            delegate.close();
+        }
+    }
+
+    private enum ProcessType {
+        BLENDING,
+        RESIZED
     }
 }

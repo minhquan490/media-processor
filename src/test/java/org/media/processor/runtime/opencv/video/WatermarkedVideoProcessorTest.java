@@ -30,6 +30,8 @@ class WatermarkedVideoProcessorTest {
         videoProcessor.close();
 
         Assertions.assertTrue(result.getData().available() > 0);
+
+        Files.deleteIfExists(path);
     }
 
     private @NotNull WatermarkedVideoProcessor getWatermarkedVideoProcessor(Path path) throws IOException {
